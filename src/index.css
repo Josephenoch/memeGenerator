@@ -161,6 +161,8 @@ header > p {
 }
 
 canvas{
+    width:0;
+    height:0;
     border:green 2px solid;
     font-family: VT323, monospace;
     display: none;

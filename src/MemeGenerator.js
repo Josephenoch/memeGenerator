@@ -6,6 +6,7 @@ const MemeGenerator = ((props)=>{
     const linkRef = useRef()
     const bottomInputRef = useRef()
     const canvasRef = useRef()
+    const downloadRef = useRef()
     const [noOfClick, setNoOfClick] = useState(0)
     const [topText, settopText] = useState("")
     const [bottomText, setbottomText] = useState("")
@@ -58,18 +59,25 @@ const MemeGenerator = ((props)=>{
         if(e.target.name==="topChecked"){
             settopChecked(e.target.checked)
             topInputRef.current.disabled = !topInputRef.current.disabled
-            settopText("") 
+            settopText("")
         }
 
         if (e.target.name === "bottomChecked") {
             setbottomChecked(e.target.checked)
             bottomInputRef.current.disabled = !bottomInputRef.current.disabled
-            setbottomText("")
+            setbottomText("")     
         }
+        setNoOfClick(0)
     })
 
-    //function to generate the download button    
+    //function to generate the download button 
+    const downloadBtn = (() =>{
+        if(canvasRef.current.height > 0){
+            setNoOfClick(noOfClick => noOfClick + 1)
+        }
+    })   
     const handleGenDownload = ((e) =>{
+        downloadBtn()
         e.preventDefault()
         var canvas = canvasRef.current
         var img = new Image()
@@ -77,7 +85,6 @@ const MemeGenerator = ((props)=>{
         img.crossOrigin = "anonymous"
         canvas.height = img.height
         canvas.width = img.width
-        console.log(canvas)
         var context = canvas.getContext("2d")
         context.drawImage(img, 0, 0);
         context.font = "25px VT323";
@@ -103,25 +110,17 @@ const MemeGenerator = ((props)=>{
         const link = linkRef.current
         link.href = image
         link.download = altText
-        setNoOfClick(noOfClick => noOfClick + 1)
-        while (!(canvasRef.current !== undefined && canvasRef.current.height !== 0 && noOfClick >= 1)) {
-            link.click()
-        }
-
-    })
-   
-    //function when the download button shows and is clicked 
-    const handleDownload = ((e)=>{
-        e.preventDefault()
-        const link = linkRef.current
-        link.click()
+    
        
-    })
-   
-    useEffect(() => {
-        
-    },[randomImg, altText, topText, bottomText])
+        if(canvas.height===0 || canvas.height <= 0){
+            console.log(img.height)
+            downloadRef.current.click()
+            return
+        }
+    
+        link.click()
 
+    })
 
     useEffect(()=>{
         fetch("https://api.imgflip.com/get_memes")
@@ -129,6 +128,16 @@ const MemeGenerator = ((props)=>{
             .then(res => setallMemeImgs(res.data.memes))
     },[])
     const hasMemes=allMemeImgs.length>0
+
+    const handleText = ((e) => {
+        if(e.target.name === "topText"){
+            settopText(e.target.value)
+        }
+        if (e.target.name === "bottomText") {
+            setbottomText(e.target.value)
+        }
+        setNoOfClick(0)
+    })
     return(<div>
             {hasMemes ?
              <div>    
@@ -139,14 +148,14 @@ const MemeGenerator = ((props)=>{
                         name="topText"
                         placeholder="Top Text"
                         value={topText}
-                    onChange={e => settopText(e.target.value)} />
+                    onChange={handleText} />
                     <input
                         ref={bottomInputRef}
                         type="text"
                         name="bottomText"
                         placeholder="Bottom Text"
                         value={bottomText}
-                    onChange={e => setbottomText(e.target.value)} />
+                    onChange={handleText} />
                     <button onClick={handleGen}>Gen</button>
                 </form>
                 <div className="meme">
@@ -174,8 +183,7 @@ const MemeGenerator = ((props)=>{
                         /><label>Lower Text?</label>
                     </div>
                     <div>
-                        <button onClick={handleGenDownload}>Gen Image</button>
-                         {canvasRef.current !== undefined  && canvasRef.current.height !==0  && noOfClick >= 1? <button onClick={handleDownload}>Download</button>:<h5>Please Click again</h5>}
+                        <button ref={downloadRef} onClick={handleGenDownload}> {noOfClick >= 1 ? "Download Image" : "Gen Image"}</button>
                     </div>
                 </div>
                 <div className="dowaload-div"> 
