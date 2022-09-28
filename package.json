@@ -2,7 +2,6 @@
   "name": "netcentric-project",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://josephenoch.github.io/memeGenerator/",
   "dependencies": {
     "@chakra-ui/react": "^1.6.5",
     "@emotion/react": "^11.4.0",
